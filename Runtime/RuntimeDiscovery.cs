@@ -33,7 +33,7 @@ namespace UnityEssentials
         /// <summary>
         /// Walks the inheritance chain and returns true if any member matches the provided predicate.
         /// </summary>
-        public static bool AnyMemberInHierarchy(Type type, Func<MemberInfo, bool> predicate, BindingFlags flags)
+        public static bool AnyMemberInHierarchy(Type type, Func<MemberInfo, bool> predicate, BindingFlags flags = AllMembers)
         {
             for (var t = type; t != null; t = t.BaseType)
             {
