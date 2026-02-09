@@ -18,11 +18,45 @@ namespace UnityEssentials
             BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
 
         /// <summary>
+        /// Lazily fetched snapshot of all MonoBehaviours.
+        /// Cached for the remainder of the current frame, then automatically refreshed next frame.
+        /// 
+        /// Call <see cref="ResetAllMonoBehavioursCache"/> to force a refetch on next access.
+        /// </summary>
+        public static MonoBehaviour[] AllMonoBehavioursCached
+        {
+            get
+            {
+                // If we already computed this frame, reuse.
+                var frame = Time.frameCount;
+                if (s_allMonoBehavioursCached != null && s_allMonoBehavioursCachedFrame == frame)
+                    return s_allMonoBehavioursCached;
+
+                s_allMonoBehavioursCached = FindAllMonoBehaviours();
+                s_allMonoBehavioursCachedFrame = frame;
+                return s_allMonoBehavioursCached;
+            }
+        }
+
+        /// <summary>
+        /// Clears the cached MonoBehaviour snapshot (sets it to null). The next access to
+        /// <see cref="AllMonoBehavioursCached"/> will refetch.
+        /// </summary>
+        public static void ResetAllMonoBehavioursCache()
+        {
+            s_allMonoBehavioursCached = null;
+            s_allMonoBehavioursCachedFrame = -1;
+        }
+
+        private static MonoBehaviour[] s_allMonoBehavioursCached;
+        private static int s_allMonoBehavioursCachedFrame = -1;
+
+        /// <summary>
         /// Finds MonoBehaviours in the current loaded scenes.
         /// Includes inactive objects on supported Unity versions.
         /// </summary>
         public static MonoBehaviour[] FindAllMonoBehaviours() =>
-            UnityEngine.Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.InstanceID);
+            UnityEngine.Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
 
         public static bool HasAttribute(MemberInfo member, Type attributeType, bool inherit = true) =>
             Attribute.IsDefined(member, attributeType, inherit);
