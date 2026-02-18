@@ -18,11 +18,17 @@ namespace UnityEssentials
             BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
 
         /// <summary>
-        /// Lazily fetched snapshot of all MonoBehaviours.
-        /// Cached for the remainder of the current frame, then automatically refreshed next frame.
-        /// 
-        /// Call <see cref="ResetAllMonoBehavioursCache"/> to force a refetch on next access.
+        /// A cached collection of all MonoBehaviour instances currently present in the scene.
+        /// The collection is lazily refreshed and stored per frame, meaning that its value
+        /// is recalculated only when accessed for the first time in a new frame. Subsequent
+        /// accesses within the same frame use the cached data instead of recalculating.
         /// </summary>
+        /// <remarks>
+        /// This property is useful for scenarios where frequent access to all MonoBehaviour
+        /// instances is required, as it avoids repeated expensive calls to Unity's object
+        /// discovery functions. Ensure to call <see cref="ResetAllMonoBehavioursCache"/>
+        /// if manual recalculations are needed before the next frame.
+        /// </remarks>
         public static MonoBehaviour[] AllMonoBehavioursCached
         {
             get
@@ -38,10 +44,7 @@ namespace UnityEssentials
             }
         }
 
-        /// <summary>
-        /// Clears the cached MonoBehaviour snapshot (sets it to null). The next access to
-        /// <see cref="AllMonoBehavioursCached"/> will refetch.
-        /// </summary>
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         public static void ResetAllMonoBehavioursCache()
         {
             s_allMonoBehavioursCached = null;
@@ -51,10 +54,6 @@ namespace UnityEssentials
         private static MonoBehaviour[] s_allMonoBehavioursCached;
         private static int s_allMonoBehavioursCachedFrame = -1;
 
-        /// <summary>
-        /// Finds MonoBehaviours in the current loaded scenes.
-        /// Includes inactive objects on supported Unity versions.
-        /// </summary>
         public static MonoBehaviour[] FindAllMonoBehaviours() =>
             UnityEngine.Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
 
