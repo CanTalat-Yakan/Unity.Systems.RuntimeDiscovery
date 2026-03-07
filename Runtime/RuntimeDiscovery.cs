@@ -55,7 +55,7 @@ namespace UnityEssentials
         private static int s_allMonoBehavioursCachedFrame = -1;
 
         public static MonoBehaviour[] FindAllMonoBehaviours() =>
-            UnityEngine.Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
+            UnityEngine.Object.FindObjectsByType<MonoBehaviour>();
 
         public static bool HasAttribute(MemberInfo member, Type attributeType, bool inherit = true) =>
             Attribute.IsDefined(member, attributeType, inherit);
